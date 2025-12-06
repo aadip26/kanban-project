@@ -1,34 +1,39 @@
 import React from "react";
+import { Task } from "./KanbanBoard";
 
-interface CardProps {
-  card: {
-    id: number;
-    title: string;
-  };
-}
+type Props = {
+  task: Task;
+  columnId: string;
+};
 
-export function KanbanCard({ card }: CardProps) {
+export function KanbanCard({ task, columnId }: Props) {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    // Safe check (fixes red underline)
-    if (e.dataTransfer) {
-      e.dataTransfer.setData("text/plain", card.title);
-    }
+    if (!e.dataTransfer) return;
+    const payload = JSON.stringify({ taskId: task.id, fromColumnId: columnId });
+    // use a custom mime type for clarity
+    e.dataTransfer.setData("application/json", payload);
+    // show copy/move cursor
+    e.dataTransfer.effectAllowed = "move";
   };
 
   return (
     <div
       draggable
       onDragStart={handleDragStart}
+      tabIndex={0}
+      role="button"
+      aria-label={`Task: ${task.title}`}
       style={{
         background: "white",
-        padding: "10px",
-        margin: "8px 0",
-        borderRadius: "6px",
-        boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+        padding: 10,
+        marginBottom: 6,
+        borderRadius: 6,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
         cursor: "grab"
       }}
     >
-      {card.title}
+      <div style={{ fontWeight: 600 }}>{task.title}</div>
+      {task.description && <div style={{ fontSize: 13, color: "#444" }}>{task.description}</div>}
     </div>
   );
 }
